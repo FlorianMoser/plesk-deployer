@@ -3,7 +3,7 @@
 namespace Deployer;
 
 require 'vendor/deployer/deployer/recipe/common.php';
-require 'vendor/florianmoser/plesk-deployer/chroot_fixes.php';
+require 'vendor/florianmoser/plesk-deployer/recipe/chroot_fixes.php';
 
 // Configuration
 
