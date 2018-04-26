@@ -33,9 +33,9 @@ set( 'use_relative_symlink', false );
  * Note: Must use run() function, plain PHP code is otherwise executed locally, not on the server.
  */
 set( 'release_path', function () {
-    $releaseExists = run( "if [ -h {{deploy_path}}/release ]; then echo 'true'; fi" )->toBool();
+    $releaseExists = test('[ -h {{deploy_path}}/release ]');
     if ( $releaseExists ) {
-        $link = run( "ls -l {{deploy_path}}/release | sed -e 's/.* -> //'" )->toString();
+        $link = run( "ls -l {{deploy_path}}/release | sed -e 's/.* -> //'" );
 
         return substr( $link, 0, 1 ) === '/' ? $link : get( 'deploy_path' ) . '/' . $link;
     } else {
@@ -56,7 +56,7 @@ set( 'release_path', function () {
  * Note: Must use run() function, plain PHP code is otherwise executed locally, not on the server.
  */
 set( 'current_path', function () {
-    $link = run( "ls -l {{deploy_path}}/current | sed -e 's/.* -> //'" )->toString();
+    $link = run( "ls -l {{deploy_path}}/current | sed -e 's/.* -> //'" );
 
     // If current path has chroot prefix, remove it
     if ( substr( $link, 0, strlen( get( 'chroot_path_prefix' ) ) ) == get( 'chroot_path_prefix' ) ) {
@@ -114,14 +114,14 @@ task( 'deploy:shared', function () {
     }
 
     foreach ( get( 'shared_dirs' ) as $dir ) {
-        // Check if shared dir does not exists.
+        // Check if shared dir does not exist.
         if ( ! test( "[ -d $sharedPath/$dir ]" ) ) {
             // Create shared dir if it does not exist.
             run( "mkdir -p $sharedPath/$dir" );
 
             // If release contains shared dir, copy that dir from release to shared.
             if ( test( "[ -d $(echo {{release_path}}/$dir) ]" ) ) {
-                run( "cp -rv {{release_path}}/$dir $sharedPath/" . dirname( $dir ) );
+                run( "cp -rv {{release_path}}/$dir $sharedPath/" . dirname( parse( $dir ) ) );
             }
         }
 
@@ -139,12 +139,12 @@ task( 'deploy:shared', function () {
     }
 
     foreach ( get( 'shared_files' ) as $file ) {
-        $dirname = dirname( $file );
+        $dirname = dirname( parse( $file ) );
 
         // Create dir of shared file
         run( "mkdir -p $sharedPath/" . $dirname );
 
-        // Check if shared file does not exists in shared.
+        // Check if shared file does not exist in shared.
         // and file exist in release
         if ( ! test( "[ -f $sharedPath/$file ]" ) && test( "[ -f {{release_path}}/$file ]" ) ) {
             // Copy file in shared dir if not present
