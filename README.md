@@ -131,3 +131,14 @@ In [Bitbucket](https://bitbucket.org/) for example, you can open your repo, go t
 After deployment to a server where PHP is running with FPM, FPM service should be restarted. This is not possible on a shared hosting.
 
 The fix for this problem is still experimental. But it seems, that touching the index file from the previous release (this is the one currently in the FPM cache), forces FPM to reload its cache (and thereby cache the new release, as the current symlink has already been updated at that time).
+
+## Unsupported GIT_SSH_COMMAND
+Deployer 7 added a default value of `ssh -o StrictHostKeyChecking=accept-new` to the environment variable *GIT_SSH_COMMAND* as described in the [docs](https://deployer.org/docs/7.x/recipe/deploy/update_code#git_ssh_command). Some hosting companies don't support this option.
+
+In this case, simply revert the value back to `ssh`:
+
+````php
+    set('git_ssh_command', 'ssh');
+````
+
+Thanks to [deflox](https://github.com/deflox) for mentioning this [issue](https://github.com/FlorianMoser/plesk-deployer/issues/3).
